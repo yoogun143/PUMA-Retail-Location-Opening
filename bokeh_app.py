@@ -1,9 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import warnings
 from bokeh.models import ColumnDataSource
-warnings.filterwarnings('ignore')
 from sklearn.preprocessing import MinMaxScaler
 from uszipcode import Zipcode
 from uszipcode import SearchEngine
