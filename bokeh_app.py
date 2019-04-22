@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 from bokeh.models import ColumnDataSource
 from sklearn.preprocessing import MinMaxScaler
 from uszipcode import Zipcode
