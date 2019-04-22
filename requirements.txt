@@ -4,4 +4,4 @@ matplotlib
 bokeh
 sklearn
 uszipcode
-no-deps pyzipcode
+pyzipcode
