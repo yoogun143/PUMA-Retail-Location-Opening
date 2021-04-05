@@ -19,7 +19,7 @@ The dashboard has 3 tabs:
 - Anaconda (optional, is used to install environment, you can use python `venv` instead)
 
 ## Screenshots (click on image for video demo)
-[<img src="./Image/demo_image.png" width="800">](https://drive.google.com/file/d/13Uib7wqFNDIh7SfF8-qrYX4w24EScYKf/preview)
+[<img src="Image/demo_image.png" width="800">](https://drive.google.com/file/d/13Uib7wqFNDIh7SfF8-qrYX4w24EScYKf/preview)
 
 ## Parameters
 - `Choose State`: Input state as abbreviation. Default state is MA.
