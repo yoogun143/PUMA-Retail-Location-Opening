@@ -1,7 +1,7 @@
-pandas
-numpy
-matplotlib
-bokeh
-sklearn
-uszipcode
-pyzipcode
+pandas==1.2.3
+uszipcode==0.2.4
+matplotlib==3.3.4
+bokeh==1.4.0
+pyzipcode==3.0.1
+numpy==1.19.2
+scikit_learn==0.24.1

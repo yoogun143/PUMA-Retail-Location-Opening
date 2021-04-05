@@ -26,7 +26,7 @@ result['ShipToZipCode'] = result['ShipToZipCode'].astype(int)
 zipcode_col = ['FromZipCode', 'ShipToZipCode', 'FinalLocationZipCode']
 for col in zipcode_col:
     result[col] = result[col].astype(str).str.zfill(5)
-    
+
 
 # Change to datetime type and find min and max date in dataset
 
@@ -53,11 +53,11 @@ def find_neighbors_list(store_zip, radius = 5):
     for sz in store_zip:
             for neighbors in zcdb.get_zipcodes_around_radius(sz, radius):
                 in_radius.append(neighbors.zip)
-    
+
     zipcode_reach = list(set(in_radius)) # remove dupplicate zipcode
     return(zipcode_reach)
-    
-    
+
+
 # Function to find all of neigbor zipcode within x miles MINUS REACH OF PHYSICAL STORE (input str)
 
 def find_neighbors_str(store_zip1, radius = 5):
@@ -67,12 +67,12 @@ def find_neighbors_str(store_zip1, radius = 5):
 
     for neighbors in zcdb.get_zipcodes_around_radius(store_zip1, radius):
         in_radius.append(neighbors.zip)
-    
+
     zipcode_reach2 = find_neighbors_list(store_zip, radius = radius)
-    
+
     return(list(set(in_radius).difference(set(zipcode_reach2))))
-    
-    
+
+
 # Create a table with all Latititude, Longitude, major_city and state from a list of zipcode
 
 def table_from_zipcodelist(listzip):
@@ -80,18 +80,18 @@ def table_from_zipcodelist(listzip):
     lng = []
     city = []
     state = []
-    
+
     for x in listzip:
         zipcode = search.by_zipcode(x)
         zipcode =zipcode.to_dict()
-    
+
         lat.append(zipcode['lat'])
         lng.append(zipcode['lng'])
         city.append(zipcode['major_city'])
         state.append(zipcode['state'])
-        
+
     store_zip_df = pd.DataFrame({'store_zip': listzip, 'lat': lat, 'lng': lng, 'in_city': city, 'in_state': state})
-    
+
     return store_zip_df
 
 
@@ -103,16 +103,16 @@ def create_store_now(state_choose = 'MA'):
     lng = []
     city = []
     state = []
-    
+
     for x in store_zip:
         zipcode = search.by_zipcode(x)
         zipcode =zipcode.to_dict()
-    
+
         lat.append(zipcode['lat'])
         lng.append(zipcode['lng'])
         city.append(zipcode['major_city'])
         state.append(zipcode['state'])
-        
+
     store_zip_df = pd.DataFrame({'store_zip': store_zip, 'lat': lat, 'lng': lng, 'in_city': city, 'in_state': state})
     store_zip_df = store_zip_df[store_zip_df['in_state'] == state_choose]
 
@@ -123,39 +123,39 @@ def create_store_now(state_choose = 'MA'):
 
 def create_store_future(state_choose = 'MA', radius = 5, Number = 0, tran_type = ['Sale', 'Return'], min_date=min_date1, max_date=max_date1):
     zip_dict = {}
-    
+
     sea_zipcode = result['ShipToZipCode'][result['State'] == state_choose].unique().tolist()
-    
+
     try:
         sea_zipcode.remove('00000')
     except:
         pass
-    
+
     zipcode_reach2 = find_neighbors_list(store_zip, radius = radius)
-    
+
     # add more parameter here
     ecom_filter = result[(result['TransactionType'].isin(tran_type)) & (result['TheDate'] >= min_date) & (result['TheDate'] <= max_date)][['ShipToZipCode', 'Transactions']].groupby('ShipToZipCode').sum()
 
-        
+
     try:
         for i in sea_zipcode:
             zcdb = ZipCodeDatabase()
             in_radius = []
             for neighbors in zcdb.get_zipcodes_around_radius(i, radius):
                 in_radius.append(neighbors.zip)
-            zipcode_reach_search = list(set(in_radius).difference(set(zipcode_reach2)))   
+            zipcode_reach_search = list(set(in_radius).difference(set(zipcode_reach2)))
             zip_dict[i] = ecom_filter[ecom_filter.index.isin(zipcode_reach_search)]['Transactions'].sum()
     except:
         pass
-    
+
     predict1 = pd.DataFrame.from_dict(zip_dict, orient = 'index', columns = ['Transactions']).sort_values('Transactions', ascending = False)
-    
+
     store_future_zip = [predict1.index[Number]]
 
     store_future = table_from_zipcodelist(list(store_future_zip))
 
     store_future['Transactions'] = predict1['Transactions'][Number]
-    
+
     return ColumnDataSource(store_future)
 
 
@@ -164,83 +164,83 @@ def create_store_future(state_choose = 'MA', radius = 5, Number = 0, tran_type =
 
 def create_data_table(state_choose = 'MA', radius = 5, Number = 0, tran_type = ['Sale', 'Return'], min_date=min_date1, max_date=max_date1):
     zip_dict = {}
-    
+
     sea_zipcode = result['ShipToZipCode'][result['State'] == state_choose].unique().tolist()
-    
+
     try:
         sea_zipcode.remove('00000')
     except:
         pass
-    
+
     zipcode_reach2 = find_neighbors_list(store_zip, radius = radius)
-    
+
     # add more parameter here
     ecom_filter = result[(result['TransactionType'].isin(tran_type)) & (result['TheDate'] >= min_date) & (result['TheDate'] <= max_date)][['ShipToZipCode', 'Transactions']].groupby('ShipToZipCode').sum()
 
-        
+
     try:
         for i in sea_zipcode:
             zcdb = ZipCodeDatabase()
             in_radius = []
             for neighbors in zcdb.get_zipcodes_around_radius(i, radius):
                 in_radius.append(neighbors.zip)
-            zipcode_reach_search = list(set(in_radius).difference(set(zipcode_reach2)))   
+            zipcode_reach_search = list(set(in_radius).difference(set(zipcode_reach2)))
             zip_dict[i] = ecom_filter[ecom_filter.index.isin(zipcode_reach_search)]['Transactions'].sum()
     except:
         pass
-    
+
     predict1 = pd.DataFrame.from_dict(zip_dict, orient = 'index', columns = ['Transactions']).sort_values('Transactions', ascending = False)
-    
+
     store_future_zip = predict1.index
 
     store_future = table_from_zipcodelist(list(store_future_zip))
 
     store_future['Transactions'] = predict1['Transactions'].tolist()
-    
+
     return ColumnDataSource(store_future)
 
 
 # Function to create ecommerce info in 1 state and categorize ecommerce transaction type: Unreached, Reached or Future Reach
 
 def create_ecom_zipcode_all(state_choose = 'MA', radius = 5, tran_type = ['Sale', 'Return'], min_date=min_date1, max_date=max_date1, Number = 0):
-    
+
     future_neighbor = find_neighbors_str(create_store_future(state_choose = state_choose, radius = radius, tran_type = tran_type, min_date = min_date, max_date = max_date, Number = Number).data['store_zip'][0], radius = radius)
-    
+
     sea_zipcode_init = result['ShipToZipCode'][result['State'] == state_choose].unique().tolist()
-    
+
     try:
         sea_zipcode_init.remove('00000')
     except:
         pass
-    
+
     sea_zipcode = list(set(future_neighbor).union(set(sea_zipcode_init)))
-    
+
     ecom_zipcode = table_from_zipcodelist(sea_zipcode)
-    
+
     zipcode_reach3 = find_neighbors_list(store_zip, radius = radius)
-    
+
     ecom_zipcode['inrange'] = 'Unreached'
 
     ecom_zipcode['inrange'][ecom_zipcode['store_zip'].isin(zipcode_reach3)] = 'Reached'
-    
+
     # Add parameter here 2
     ecom_zipcode['inrange'][ecom_zipcode['store_zip'].isin(future_neighbor)] = 'Future Reach'
-    
+
     # Add parameter here 1
     sum_by_shiptozipcode_all = result[(result['TransactionType'].isin(tran_type)) & (result['TheDate'] >= min_date) & (result['TheDate'] <= max_date)][['ShipToZipCode', 'Transactions']].groupby('ShipToZipCode').sum()
-    
+
     sum_by_shiptozipcode = sum_by_shiptozipcode_all[sum_by_shiptozipcode_all.index.isin(sea_zipcode)].reset_index()
-    
+
     # Join ecom_zipcode with sum_by_shiptozipcode
     ecom_zipcode_all = pd.merge(ecom_zipcode, sum_by_shiptozipcode, left_on = 'store_zip', right_on = 'ShipToZipCode')
-    
-    
+
+
     ecom_zipcode_all = ecom_zipcode_all[ecom_zipcode_all['store_zip'] != '00000']
-    
+
     scaler = MinMaxScaler(feature_range = (5,15))
 
     ecom_zipcode_all['Size'] = scaler.fit_transform(ecom_zipcode_all['Transactions'].values.reshape(-1,1))
-    
+
     return ColumnDataSource(ecom_zipcode_all)
 
 
@@ -261,14 +261,14 @@ def make_plot(store_now, store_future, ecom_zipcode_all):
     plot = gmap(map_options=map_options, google_api_key='AIzaSyCrnuAv4K0j80AZzUsYFS2NwyY49-yMXRI',plot_width=780, plot_height=780, output_backend="webgl")
     plot.title.text = "PUMA Retail Store and Ecommerce Transactions"
 
-    mapper = CategoricalColorMapper(factors=['Unreached', 'Reached', 'Future Reach'], 
+    mapper = CategoricalColorMapper(factors=['Unreached', 'Reached', 'Future Reach'],
                                     palette=[RdBu3[1], RdBu3[0], RdBu3[2]])
 
     plot1 = plot.square(x="lng", y="lat", size = 20, color = 'blue', source = store_now)
     plot2 = plot.square(x="lng", y="lat", size = 20, color = 'red', source = store_future)
     plot3 = plot.circle(x="lng", y="lat", size = 'Size', fill_color={'field': 'inrange','transform': mapper}, source = ecom_zipcode_all, legend = 'inrange')
 
-    
+
     tooltips1 = [
         ("Ship To ZipCode", "@store_zip"),
         ("Ship To City","@in_city"),
@@ -282,9 +282,9 @@ def make_plot(store_now, store_future, ecom_zipcode_all):
         ('Ecom Transactions in range', '@Transactions')
     ]
     plot.add_tools(HoverTool(tooltips=tooltips3, renderers = [plot2]))
-    
+
     plot.add_tools(LassoSelectTool())
-    
+
     return plot
 
 
@@ -292,11 +292,11 @@ def make_plot(store_now, store_future, ecom_zipcode_all):
 # Function to make data table from data table source
 
 def make_data_table(data_table_source, option):
-    
+
     from bokeh.models.widgets import DataTable, TableColumn
-    
+
     if option == 'data_table1':
-        
+
         columns = [
             TableColumn(field="store_zip", title="Future Store ZipCode"),
             TableColumn(field="lat", title="Latitude"),
@@ -305,9 +305,9 @@ def make_data_table(data_table_source, option):
             TableColumn(field="in_state", title="State"),
             TableColumn(field="Transactions", title="Total Transactions within x miles")
         ]
-    
+
     if option == 'data_table2':
-        
+
         columns = [
             TableColumn(field="store_zip", title="Ecommerce ZipCode"),
             TableColumn(field="lat", title="Latitude"),
@@ -317,9 +317,9 @@ def make_data_table(data_table_source, option):
             TableColumn(field="Transactions", title="Transactions"),
             TableColumn(field="inrange", title="In Range")
         ]
-        
+
     data_table = DataTable(source=data_table_source, columns=columns, width=1000, height=750)
-    
+
     return data_table
 
 
@@ -328,19 +328,19 @@ def make_data_table(data_table_source, option):
 def update(attr, old, new):
     state_plot = state_choose.value
     trantype_to_plot = [tran_type_select.labels[i] for i in tran_type_select.active]
-    
+
     new_store_now = create_store_now(state_choose = state_plot)
     new_store_future = create_store_future(state_choose = state_plot, radius = int(radius_select.value), tran_type = trantype_to_plot, min_date = min_date_select.value, max_date = max_date_select.value, Number = int(solution_select.value))
     new_ecom_zipcode_all = create_ecom_zipcode_all(state_choose = state_plot, radius = int(radius_select.value), tran_type = trantype_to_plot, min_date = min_date_select.value, max_date = max_date_select.value, Number = int(solution_select.value))
     new_data_table_source = create_data_table(state_choose = state_plot, radius = int(radius_select.value), tran_type = trantype_to_plot, min_date=min_date_select.value, max_date=max_date_select.value, Number = int(solution_select.value))
-    
+
     data_table_source.data = new_data_table_source.data
     store_now.data = new_store_now.data
     store_future.data = new_store_future.data
     ecom_zipcode_all.data = new_ecom_zipcode_all.data
-    
-    
-    
+
+
+
 # Bokeh Widgets
 
 from bokeh.io import output_file, show
