@@ -31,8 +31,8 @@ The dashboard has 3 tabs:
 ## Notes
 - The dashboard runs really slow so please changing each parameters once at a time and be patient.
 - Choosing different state will not change current view and you have to scroll to chosen state
-- If new store chosen is adjacent to the border of 2 state, Ecommerce transactions in nearby state within radius are included and shown in "All Online Transactions by ZipCode" tab. For example, a store in NYC can still attract online customers in Newark, NJ.
-- The dashboard can also identify best in-city location by sorting 'All possible locations' by 'city'
+- If new store chosen is adjacent to the border of 2 state, Ecommerce transactions in nearby state within radius are included and shown in **All Online Transactions by ZipCode** tab. For example, a store in NYC can still attract online customers in Newark, NJ.
+- The dashboard can also identify best in-city location by sorting **All Possible Locations** by *city*
 - Some locations are not shown on map because coordinates for those ZipCode are missing. However, transactions are included and shown in 2 table tabs.
 - Choosing timeframe based on desirable season. For example, examining store location measurement for different year, different quarter
 
@@ -53,20 +53,25 @@ $ pip install -r requirements.txt #Install required dependencies
 
 3. Run the app
 ```bash
-$ python views_pytorch.py
- * Running on http://127.0.0.1:5000/
+$ bokeh serve --show bokeh_app.py
+ * Bokeh app running at: http://localhost:5006/bokeh_app
 ```
 
-Voila! the app is now run locally. Now head over to http://127.0.0.1:5000/, and you should see your app roaring.
+The app will run at http://localhost:5006/bokeh_app.
 
 ## Roadmap
-- [ ] Reduce web app latency, loading function
-- [ ] Handwritten keyboard
-- [ ] Train with more words
+- [ ] Automatically change view to current state when choose state.
+- [ ] Fix bug of transactions in other states are included in chose state.
+- [ ] Use other Zipcode API for better geo-tagging.
+- [ ] Reduce web app latency, loading function.
+- [ ] Improve UI to be more user friendly.
+- [ ] Mobile application.
 
 
 ## Credits
+Northeastern University - College of Professional Studies.
 
+PUMA North America, Inc.
 
 ## License
 MIT License
